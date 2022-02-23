@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.shallow.universe.process.repository.TaskMapper">
+
+    <!--返回集合-->
+    <resultMap type="com.shallow.universe.process.model.Task" id="TaskResultMap">
+        <id property="sid" column="SID"/>
+        <result property="processId" column="PROCESS_ID"/>
+        <result property="user" column="USER"/>
+        <result property="currentStage" column="CURRENT_STAGE"/>
+        <result property="target" column="TARGET"/>
+        <result property="targetKey" column="TARGET_KEY"/>
+        <result property="targetKeyValue" column="TARGET_KEY_VALUE"/>
+        <result property="classPath" column="CLASS_PATH"/>
+        <result property="status" column="STATUS"/>
+        <result property="created" column="CREATED"/>
+        <result property="lastUpdated" column="LAST_UPDATED"/>
+        <result property="isApprove" column="isApprove"/>
+    </resultMap>
+
+    <sql id="commonChoose">
+        <choose>
+            <when test="params.approveUser != null and params.approveUser != '' and params.roles != null and params.roles.size() != 0">
+                AND (
+                b.USER LIKE CONCAT('%', #{params.approveUser} ,'%')
+                OR b.ROLE IN
+                <foreach collection="params.roles" item="role" separator="," open="(" close=")">
+                    #{role}
+                </foreach>
+                )
+            </when>
+            <when test="params.roles != null and params.roles.size() != 0">
+                AND b.ROLE IN
+                <foreach collection="params.roles" item="role" separator="," open="(" close=")">
+                    #{role}
+                </foreach>
+            </when>
+            <when test="params.approveUser != null and params.approveUser != ''">
+                AND b.USER LIKE CONCAT('%', #{params.approveUser} ,'%')
+            </when>
+        </choose>
+    </sql>
+
+    <sql id="commonTaskQuery">
+        SELECT a.*,IF(c.TASK_ID IS NULL, '0', '1') isApprove FROM easy_task a
+        INNER JOIN easy_process_stage b ON a.CURRENT_STAGE = b.SID
+        LEFT JOIN (
+            SELECT a.TASK_ID FROM easy_task_step a
+            INNER JOIN easy_process_stage b ON a.STAGE_ID = b.SID
+            <include refid="commonChoose"/>
+        ) c ON a.SID = c.TASK_ID
+        <where>
+            <if test="params.submitUser != null and params.submitUser != ''">
+                AND a.USER = #{params.submitUser}
+            </if>
+            <if test="params.statusList != null and params.statusList.size() != 0">
+                AND a.STATUS IN
+                <foreach collection="params.statusList" item="status" separator="," open="(" close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="params.target != null and params.target != ''">
+                AND a.TARGET = #{params.target}
+            </if>
+            <if test="params.processId != null">
+                AND a.PROCESS_ID = #{params.processId}
+            </if>
+            <if test="params.department != null and params.department != ''">
+                AND b.DEPARTMENT = #{params.department}
+            </if>
+            <include refid="commonChoose"/>
+        </where>
+        GROUP BY a.SID
+    </sql>
+
+    <select id="executePageQuery" resultMap="TaskResultMap">
+        <include refid="commonTaskQuery"/>
+    </select>
+
+    <select id="executeQuery" resultMap="TaskResultMap">
+        <include refid="commonTaskQuery"/>
+    </select>
+
+    <select id="executeTargetQuery" resultType="java.util.Map">
+        SELECT * FROM ${target} WHERE ${targetKey} = #{targetKeyValue}
+    </select>
+
+    <select id="findTargetValue" resultType="object">
+        SELECT ${field} FROM ${target} WHERE ${targetKey} = #{targetKeyValue}
+    </select>
+</mapper>

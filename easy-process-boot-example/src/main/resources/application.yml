@@ -1,0 +1,22 @@
+shallow:
+  process:
+    task-processor-packages: com.example.processor
+
+server:
+  port: 80
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql:///process?serverTimezone=Asia/Shanghai&autoReconnect=true&useUnicode=true&characterEncoding=utf8
+    username: root
+    password: root
+
+logging:
+  level:
+    com.shallow.universe.process: debug
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: false
+
+

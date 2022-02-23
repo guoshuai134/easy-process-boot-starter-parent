@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.shallow.universe.process.repository.TaskStepMapper">
+
+    <!--返回集合-->
+    <resultMap type="com.shallow.universe.process.model.TaskStep" id="TaskStepResultMap">
+        <id property="sid" column="SID"/>
+        <result property="taskId" column="TASK_ID"/>
+        <result property="stageId" column="STAGE_ID"/>
+        <result property="user" column="USER"/>
+        <result property="role" column="ROLE"/>
+        <result property="opinion" column="OPINION"/>
+        <result property="reason" column="REASON"/>
+        <result property="status" column="STATUS"/>
+        <result property="created" column="CREATED"/>
+        <result property="lastUpdated" column="LAST_UPDATED"/>
+    </resultMap>
+
+    <sql id="commonTaskStepQuery">
+        SELECT * FROM easy_task_step
+        <where>
+            <if test="params.taskId != null">
+                AND TASK_ID = #{params.taskId}
+            </if>
+            <if test="params.taskIds != null">
+                AND TASK_ID IN
+                <foreach collection="params.taskIds" item="taskId" separator="," open="(" close=")">
+                    #{taskId}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
+    <select id="executePageQuery" resultMap="TaskStepResultMap">
+        <include refid="commonTaskStepQuery"/>
+    </select>
+
+    <select id="executeQuery" resultMap="TaskStepResultMap">
+        <include refid="commonTaskStepQuery"/>
+    </select>
+
+</mapper>

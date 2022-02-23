@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.shallow.universe.process.repository.ProcessMapper">
+
+    <!--返回集合-->
+    <resultMap type="com.shallow.universe.process.model.Process" id="ProcessResultMap">
+        <id property="sid" column="SID"/>
+        <result property="title" column="TITLE"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="backMode" column="BACK_MODE"/>
+        <result property="receiveUser" column="RECEIVE_USER"/>
+        <result property="created" column="CREATED"/>
+        <result property="lastUpdated" column="LAST_UPDATED"/>
+    </resultMap>
+
+    <sql id="commonProcessQuery">
+        SELECT * FROM easy_process
+        <where>
+            <if test="params.title != null and params.title != ''">
+                AND TITLE LIKE CONCAT('%', #{params.title} ,'%')
+            </if>
+        </where>
+    </sql>
+
+    <select id="executePageQuery" resultMap="ProcessResultMap">
+        <include refid="commonProcessQuery" />
+    </select>
+
+    <select id="executeQuery" resultMap="ProcessResultMap">
+        <include refid="commonProcessQuery" />
+    </select>
+</mapper>

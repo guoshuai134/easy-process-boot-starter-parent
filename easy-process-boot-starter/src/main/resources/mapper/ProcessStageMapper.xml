@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.shallow.universe.process.repository.ProcessStageMapper">
+
+    <!--返回集合-->
+    <resultMap type="com.shallow.universe.process.model.ProcessStage" id="ProcessStageResultMap">
+        <id property="sid" column="SID"/>
+        <result property="title" column="TITLE"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="department" column="DEPARTMENT"/>
+        <result property="user" column="USER"/>
+        <result property="role" column="ROLE"/>
+        <result property="ordered" column="ORDERED"/>
+        <result property="mode" column="MODE"/>
+        <result property="field" column="FIELD"/>
+        <result property="condition" column="CONDITION"/>
+        <result property="value" column="VALUE"/>
+        <result property="processId" column="PROCESS_ID"/>
+        <result property="created" column="CREATED"/>
+        <result property="lastUpdated" column="LAST_UPDATED"/>
+    </resultMap>
+
+    <sql id="commonProcessStageQuery">
+        SELECT * FROM easy_process_stage
+        <where>
+            <if test="params.title != null and params.title != ''">
+                AND TITLE LIKE CONCAT('%', #{params.title} ,'%')
+            </if>
+            <if test="params.user != null and params.user != ''">
+                AND `USER` LIKE CONCAT('%', #{params.user} ,'%')
+            </if>
+            <if test="params.role != null and params.role != ''">
+                AND `ROLE` LIKE CONCAT('%', #{params.role} ,'%')
+            </if>
+            <if test="params.processId != null">
+                AND PROCESS_ID = #{params.processId}
+            </if>
+            <if test="params.processIds != null">
+                AND PROCESS_ID IN
+                <foreach collection="params.processIds" item="processId" separator="," open="(" close=")">
+                    #{processId}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
+    <select id="executePageQuery" resultMap="ProcessStageResultMap">
+        <include refid="commonProcessStageQuery"/>
+    </select>
+
+    <select id="executeQuery" resultMap="ProcessStageResultMap">
+        <include refid="commonProcessStageQuery"/>
+    </select>
+
+    <select id="selectMaxStage" resultType="com.shallow.universe.process.model.ProcessStage">
+        SELECT * FROM easy_process_stage
+        <where>
+            <if test="department != null and department != ''">
+                AND `DEPARTMENT` = #{department}
+            </if>
+            <choose>
+                <when test="user != null and user != '' and roles != null and roles.size() != 0">
+                    AND (
+                        `USER` LIKE CONCAT('%', #{user} ,'%')
+                        OR
+                        <foreach collection="roles" item="role" separator=" OR" open="(" close=")">
+                            `ROLE` LIKE CONCAT('%', #{role} ,'%')
+                        </foreach>
+                    )
+                </when>
+                <when test="roles != null and roles.size() != 0">
+                    AND
+                    <foreach collection="roles" item="role" separator=" OR" open="(" close=")">
+                        `ROLE` LIKE CONCAT('%', #{role} ,'%')
+                    </foreach>
+                </when>
+                <when test="user != null and user != ''">
+                    AND `USER` LIKE CONCAT('%', #{user} ,'%')
+                </when>
+            </choose>
+        </where>
+        ORDER BY ORDERED DESC LIMIT 1
+    </select>
+</mapper>

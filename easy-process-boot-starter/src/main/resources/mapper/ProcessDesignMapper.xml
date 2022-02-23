@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.shallow.universe.process.repository.ProcessDesignMapper">
+
+    <!--返回集合-->
+    <resultMap type="com.shallow.universe.process.model.ProcessDesign" id="ProcessDesignResultMap">
+        <id property="sid" column="SID"/>
+        <result property="label" column="LABEL"/>
+        <result property="type" column="TYPE"/>
+        <result property="x" column="X"/>
+        <result property="y" column="Y"/>
+        <result property="stageId" column="STAGE_ID"/>
+        <result property="source" column="SOURCE"/>
+        <result property="target" column="TARGET"/>
+        <result property="processId" column="PROCESS_ID"/>
+        <result property="created" column="CREATED"/>
+        <result property="lastUpdated" column="LAST_UPDATED"/>
+    </resultMap>
+
+    <sql id="commonProcessQuery">
+        SELECT * FROM easy_process_design
+        <where>
+            <if test="params.processId != null">
+                AND PROCESS_ID = #{params.processId}
+            </if>
+        </where>
+    </sql>
+
+    <select id="executePageQuery" resultMap="ProcessDesignResultMap">
+        <include refid="commonProcessQuery"/>
+    </select>
+
+    <select id="executeQuery" resultMap="ProcessDesignResultMap">
+        <include refid="commonProcessQuery"/>
+    </select>
+</mapper>
