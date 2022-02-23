@@ -1,5 +1,5 @@
 # 工程简介
-一款简单的工作流设计器，完整功能请拉取design分支
+一款简单的工作流设计器
 
 # 使用步骤
 #### 1. 访问http://host:port/shallow-ui/process-design.html
